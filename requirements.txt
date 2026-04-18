@@ -1,0 +1,4 @@
+google-genai
+Jinja2
+python-dotenv
+mcp
