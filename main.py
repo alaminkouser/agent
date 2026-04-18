@@ -50,7 +50,7 @@ async def main():
     # TEMPERATURE THEN TIME THEN NAME AND AGE : "What is the temperature and current time and greet me please, my name is Humpty Dumpty and I am 25 years old"
     # TIME THEN TEMPERATURE THEN NAME         : "What is the current time and temperature and greet me please, my name is Humpty Dumpty"
     res = await CLIENT.aio.models.generate_content(
-        model="gemma-4-31b-it", contents="What is the current time and temperature and greet me please, my name is Humpty Dumpty and I am 25 years old",
+        model="gemma-4-31b-it", contents="What is the current time and temperature and greet me please, my name is Humpty Dumpty",
         config=genai.types.GenerateContentConfig(
             temperature=0,
             tools=[MCP_SESSION, grounding_tool, x, y, g],
