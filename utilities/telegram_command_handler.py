@@ -1,6 +1,7 @@
 import os
 from telegram import Update
 from telegram.ext import ContextTypes
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from .db import DB
 
 async def handle_command_clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -9,8 +10,18 @@ async def handle_command_clear(update: Update, context: ContextTypes.DEFAULT_TYP
         await update.message.reply_text("YOU ARE NOT ALLOWED TO USE THIS BOT!")
         return
     
-    DB.execute("DELETE FROM chat_history")
-    DB.commit()
+    # Show confirmation
+    keyboard = [
+        [
+            InlineKeyboardButton("Yes", callback_data="clear:yes"),
+            InlineKeyboardButton("No", callback_data="clear:no"),
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        "Are you sure you want to clear chat history?",
+        reply_markup=reply_markup
+    )
     
-    await update.message.reply_text("CHAT HISTORY CLEARED!")
-        

@@ -51,6 +51,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         genai.types.Content(role="user", parts=[genai.types.Part(text=MESSAGE)])
     )
 
+    MCP: MCPConnectionManager | None = None
     try:
         MCP = MCPConnectionManager()
         MCP_SESSION = await MCP.connect()
@@ -66,9 +67,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ),
             ),
         )
+
+        TOOLS_USED = []
+        for content in AI_RESPONSE.automatic_function_calling_history:
+            for part in content.parts:
+                if part.function_call:
+                    TOOLS_USED.append(part.function_call.name)
+
         REPLY_MD = AI_RESPONSE.text
 
-        CHUNKS = await telegramify(REPLY_MD, max_message_length=4090)
+        REPLY_MD_FOR_CHUNKS = REPLY_MD
+        if TOOLS_USED:
+            REPLY_MD_FOR_CHUNKS = f"{REPLY_MD}\n\n**TOOLS USED**\n\n- {"\n- ".join(TOOLS_USED)}"
+
+        CHUNKS = await telegramify(REPLY_MD_FOR_CHUNKS, max_message_length=4090)
         for chunk in CHUNKS:
             if chunk.content_type == ContentType.TEXT:
                 await update.message.reply_text(
@@ -105,5 +117,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         DB.commit()
     except Exception as e:
         await update.message.reply_text(f"ERROR: {e}")
-
-    await MCP.disconnect()
+    finally:
+        if MCP is not None:
+            await MCP.disconnect()
