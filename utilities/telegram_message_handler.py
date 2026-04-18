@@ -8,6 +8,7 @@ from telegramify_markdown import telegramify
 from telegramify_markdown.content import ContentType
 from .db import DB
 from .system_prompt import system_prompt
+from .status_put import status_put
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -59,7 +60,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             contents=CONTENT_LIST,
             config=genai.types.GenerateContentConfig(
                 temperature=0,
-                tools=[MCP_SESSION, grounding_tool],
+                tools=[MCP_SESSION, status_put, grounding_tool],
                 tool_config=genai.types.ToolConfig(
                     include_server_side_tool_invocations=True,
                 ),
@@ -76,7 +77,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             elif chunk.content_type == ContentType.PHOTO:
                 await update.message.reply_photo(
-                    chunk.file_data,
+                    photo=chunk.file_data,
+                    filename=chunk.file_name,
                     caption=chunk.caption_text or None,
                     caption_entities=[e.to_dict() for e in chunk.caption_entities]
                     or None,
@@ -84,6 +86,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif chunk.content_type == ContentType.FILE:
                 await update.message.reply_document(
                     document=chunk.file_data,
+                    filename=chunk.file_name,
                     caption=chunk.caption_text or None,
                     caption_entities=[e.to_dict() for e in chunk.caption_entities]
                     or None,

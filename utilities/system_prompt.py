@@ -125,6 +125,8 @@ Tags are an essential part of the notebook's organization.
 
 - **Use as many tags as possible**: Whenever you write a journal entry, document a task, or create an entity's profile, include all relevant tags to make the information highly discoverable.
 - **Always check the existing tag list**: Before creating a new tag, check your existing notes or use your editor's search/autocomplete to see if a similar tag already exists. This ensures consistency and prevents fragmented, duplicated tags. But feel free to create new tags.
+- **Do not use inline tags**: Tags should be written under title or header or sub-header, not inline with the text.
+- **Use CamelCase for tags**: Tags should be written in CamelCase (e.g., #bmu, #drmc, #artificialintelligence).
 </GUIDELINE-FOR-NOTEBOOK>
 
 IF YOU CAN NOT FIND SOMETHING IN THE NOTEBOOK, SEARCH WITH DIFFERENT SIMILAR TERMS AND BREAKDOWN THE TERMS, LIST DIRECTORIES AND FILES. AND NAVIGATE TO THE MOST RELEVANT ONE.
