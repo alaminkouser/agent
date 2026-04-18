@@ -2,7 +2,6 @@ import datetime
 from utilities.mcp_connection_manager import MCPConnectionManager
 import asyncio
 import os
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 from google import genai
 
 from dotenv import load_dotenv
@@ -13,35 +12,55 @@ CLIENT = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"),
 )
 
-TEMPLATE_ENVIRONMENT = Environment(
-    loader=FileSystemLoader("utilities/templates"),
-    autoescape=select_autoescape()
-)
-
 grounding_tool = genai.types.Tool(
     google_search=genai.types.GoogleSearch()
 )
 
-def current_time():
+def x():
+    """
+    I tell current time
+    """
     print("current_time")
     return "5:00 AM"
 
-async def main():
-    mcp = MCPConnectionManager()
-    session = await mcp.connect()
+def y():
+    """
+    I tell current temperature
+    """
+    print("current_temperature")
+    return "25 degree Celsius"
 
+def g(name: str, age: int | None = None):
+    """
+    I greet you, But you need to tell me your name first and age if you want.
+    """
+    print("greeting")
+    return f"Hello {name}, you are {age} years old"
+
+async def main():
+    MCP = MCPConnectionManager()
+    MCP_SESSION = await MCP.connect()
+
+    # Example of Contents:
+    # NAME AND AGE ONLY                       : "Greet me please, my name is Humpty Dumpty and I am 25 years old"
+    # ONLY CURRENT TIME                       : "What is the current time?"
+    # ONLY TEMPERATURE                        : "What is the current temperature?"
+    # TIME THEN TEMPERATURE                   : "What is the current time and temperature?"
+    # TIME THEN TEMPERATURE THEN NAME AND AGE : "What is the current time and temperature and greet me please, my name is Humpty Dumpty and I am 25 years old"
+    # TEMPERATURE THEN TIME THEN NAME AND AGE : "What is the temperature and current time and greet me please, my name is Humpty Dumpty and I am 25 years old"
+    # TIME THEN TEMPERATURE THEN NAME         : "What is the current time and temperature and greet me please, my name is Humpty Dumpty"
     res = await CLIENT.aio.models.generate_content(
-        model="gemma-4-31b-it", contents='READ the PERSONS/al-amin-kouser.md file and tell about him. find about him using notebook, and tell me the current time, and what is the current temperature in dhaka now?',
+        model="gemma-4-31b-it", contents="What is the current time and temperature and greet me please, my name is Humpty Dumpty and I am 25 years old",
         config=genai.types.GenerateContentConfig(
             temperature=0,
-            tools=[session, grounding_tool],
+            tools=[MCP_SESSION, grounding_tool, x, y, g],
             tool_config=genai.types.ToolConfig(
                 include_server_side_tool_invocations=True,
             ),
         ),
     )
-    print(res.text)
-    await mcp.disconnect()
+    print("AI GENERATED: " + res.text)
+    await MCP.disconnect()
 
 if __name__ == "__main__":
     asyncio.run(main())
