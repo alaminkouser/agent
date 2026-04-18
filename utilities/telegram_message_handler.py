@@ -1,0 +1,106 @@
+import os
+from telegram import Update, ReactionTypeEmoji
+from telegram.ext import ContextTypes
+from mcp import ClientSession
+from google import genai
+from .mcp_connection_manager import MCPConnectionManager
+from telegramify_markdown import telegramify
+from telegramify_markdown.content import ContentType
+from .db import DB
+from .system_prompt import system_prompt
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    ALLOWED_ID = int(os.getenv("TELEGRAM_CHAT_ID"))
+    if update.message.chat.id != ALLOWED_ID:
+        await update.message.reply_text("YOU ARE NOT ALLOWED TO USE THIS BOT!")
+        return
+
+    GENAI_CLIENT = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY"),
+    )
+
+    grounding_tool = genai.types.Tool(google_search=genai.types.GoogleSearch())
+    await context.bot.set_message_reaction(
+        chat_id=update.effective_chat.id,
+        message_id=update.effective_message.message_id,
+        reaction=[ReactionTypeEmoji(emoji="⚡")],
+    )
+
+    MESSAGE = update.message.text
+
+    ALL_MESSAGES = DB.execute(
+        "SELECT * FROM chat_history ORDER BY id DESC LIMIT 50"
+    ).fetchall()
+
+    CONTENT_LIST = [
+        genai.types.Content(
+            role="system", parts=[genai.types.Part(text=system_prompt())]
+        )
+    ]
+    for row in ALL_MESSAGES:
+        CONTENT_LIST.append(
+            genai.types.Content(role="user", parts=[genai.types.Part(text=row[1])])
+        )
+        CONTENT_LIST.append(
+            genai.types.Content(role="model", parts=[genai.types.Part(text=row[2])])
+        )
+
+    CONTENT_LIST.append(
+        genai.types.Content(role="user", parts=[genai.types.Part(text=MESSAGE)])
+    )
+
+    try:
+        MCP = MCPConnectionManager()
+        MCP_SESSION = await MCP.connect()
+
+        AI_RESPONSE = await GENAI_CLIENT.aio.models.generate_content(
+            model="gemma-4-31b-it",
+            contents=CONTENT_LIST,
+            config=genai.types.GenerateContentConfig(
+                temperature=0,
+                tools=[MCP_SESSION, grounding_tool],
+                tool_config=genai.types.ToolConfig(
+                    include_server_side_tool_invocations=True,
+                ),
+            ),
+        )
+        REPLY_MD = AI_RESPONSE.text
+
+        CHUNKS = await telegramify(REPLY_MD, max_message_length=4090)
+        for chunk in CHUNKS:
+            if chunk.content_type == ContentType.TEXT:
+                await update.message.reply_text(
+                    chunk.text,
+                    entities=[e.to_dict() for e in chunk.entities],
+                )
+            elif chunk.content_type == ContentType.PHOTO:
+                await update.message.reply_photo(
+                    chunk.file_data,
+                    caption=chunk.caption_text or None,
+                    caption_entities=[e.to_dict() for e in chunk.caption_entities]
+                    or None,
+                )
+            elif chunk.content_type == ContentType.FILE:
+                await update.message.reply_document(
+                    document=chunk.file_data,
+                    caption=chunk.caption_text or None,
+                    caption_entities=[e.to_dict() for e in chunk.caption_entities]
+                    or None,
+                )
+
+        await context.bot.set_message_reaction(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id,
+            reaction=[ReactionTypeEmoji(emoji="👍")],
+        )
+
+        DB.execute(
+            "INSERT INTO chat_history (message, response) VALUES (?, ?)",
+            (MESSAGE, REPLY_MD),
+        )
+        DB.commit()
+    except Exception as e:
+        await update.message.reply_text(f"ERROR: {e}")
+
+    await MCP.disconnect()

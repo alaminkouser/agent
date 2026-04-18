@@ -1,4 +1,6 @@
 python-telegram-bot
+telegramify-markdown[mermaid]
 google-genai
 python-dotenv
 mcp
+watchfiles

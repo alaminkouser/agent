@@ -9,7 +9,9 @@ class MCPConnectionManager:
     """MCP vault over stdio: ``session = await mgr.connect()`` then ``await mgr.disconnect()``."""
 
     def __init__(self, notebook_path: Optional[str] = None) -> None:
-        path = notebook_path if notebook_path is not None else os.getenv("NOTEBOOK_PATH")
+        path = (
+            notebook_path if notebook_path is not None else os.getenv("NOTEBOOK_PATH")
+        )
         if not path:
             raise ValueError(
                 "Set NOTEBOOK_PATH or pass notebook_path= to MCPConnectionManager."
