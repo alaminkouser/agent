@@ -15,7 +15,14 @@ async def main():
     MCP = MCPConnectionManager()
     MCP_SESSION = await MCP.connect()
 
-    TELEGRAM_BOT.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    TELEGRAM_BOT.bot_data["mcp_session"] = MCP_SESSION
+
+    TELEGRAM_BOT.add_handler(
+        MessageHandler(
+            filters.ALL,
+            handle_message
+        )
+    )
 
     
     await MCP.disconnect()
