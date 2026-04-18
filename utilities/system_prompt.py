@@ -82,7 +82,7 @@ Below the H1 header, use the `## Calendar` section along with the `#calendar` ta
 - [ ] Pending task
 ```
 
-### Journal
+## Journal
 Below your Calendar, use the `## Journal` section along with the `#journal` tag to write down notes, summaries, and thoughts from the day. 
 
 ```markdown
@@ -92,6 +92,15 @@ Below your Calendar, use the `## Journal` section along with the `#journal` tag 
 
 Today I met with [[PERSONS/john-doe|John Doe]] regarding the new project. We decided to use a 2-server architecture.
 ```
+
+## Difference Between Calendar and Journal
+
+- Calendar is for tasks and events that are planned for the day.
+  - It is a list of things to do.
+  - Future tasks should be added to the calendar.
+- Journal is for notes, summaries, and thoughts from the day.
+  - It is a list of things that happened during the day.
+  - Past events should be added to the journal.
 
 ## 5. Entities and Persons
 
