@@ -6,7 +6,7 @@ from telegram import Update
 from utilities.telegram_message_handler import handle_message
 from utilities.telegram_command_handler import handle_command_clear
 from utilities.telegram_command_clear_callback import handle_command_clear_callback
-from utilities.telegram_post_init import telegram_post_init
+from utilities.telegram_post import telegram_post_init, telegram_post_shutdown
 
 from dotenv import load_dotenv
 
@@ -26,6 +26,7 @@ async def main():
     
     
     TELEGRAM_BOT.post_init = telegram_post_init
+    TELEGRAM_BOT.post_shutdown = telegram_post_shutdown
 
 
 if __name__ == "__main__":

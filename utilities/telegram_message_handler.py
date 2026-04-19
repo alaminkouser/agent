@@ -2,7 +2,6 @@ import os
 from telegram import Update, ReactionTypeEmoji
 from telegram.ext import ContextTypes
 from google import genai
-from .mcp_connection_manager import create_mcp_client
 from telegramify_markdown import telegramify
 from telegramify_markdown.content import ContentType
 from .db import DB
@@ -51,67 +50,71 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         genai.types.Content(role="user", parts=[genai.types.Part(text=MESSAGE)])
     )
 
+    MCP_CLIENT = context.application.bot_data.get("mcp_client")
+    if MCP_CLIENT is None:
+        await update.message.reply_text("ERROR: MCP client is not initialized.")
+        return
+
     try:
-        async with create_mcp_client() as MCP_CLIENT:
-            AI_RESPONSE = await GENAI_CLIENT.aio.models.generate_content(
-                model="gemma-4-31b-it",
-                contents=CONTENT_LIST,
-                config=genai.types.GenerateContentConfig(
-                    temperature=0,
-                    tools=[MCP_CLIENT.session, status_put, grounding_tool],
-                    tool_config=genai.types.ToolConfig(
-                        include_server_side_tool_invocations=True,
-                    ),
+        AI_RESPONSE = await GENAI_CLIENT.aio.models.generate_content(
+            model="gemma-4-31b-it",
+            contents=CONTENT_LIST,
+            config=genai.types.GenerateContentConfig(
+                temperature=0,
+                tools=[MCP_CLIENT.session, status_put, grounding_tool],
+                tool_config=genai.types.ToolConfig(
+                    include_server_side_tool_invocations=True,
                 ),
-            )
+            ),
+        )
 
-            TOOLS_USED = []
-            for content in AI_RESPONSE.automatic_function_calling_history:
-                for part in content.parts:
-                    if part.function_call:
-                        TOOLS_USED.append(part.function_call.name)
+        TOOLS_USED = []
+        for content in AI_RESPONSE.automatic_function_calling_history:
+            for part in content.parts:
+                if part.function_call:
+                    TOOLS_USED.append(part.function_call.name)
 
-            REPLY_MD = AI_RESPONSE.text
+        REPLY_MD = AI_RESPONSE.text
 
-            REPLY_MD_FOR_CHUNKS = REPLY_MD
-            if TOOLS_USED:
-                REPLY_MD_FOR_CHUNKS = f"{REPLY_MD}\n\n**TOOLS USED**\n\n- {"\n- ".join(TOOLS_USED)}"
+        REPLY_MD_FOR_CHUNKS = REPLY_MD
+        if TOOLS_USED:
+            REPLY_MD_FOR_CHUNKS = f"{REPLY_MD}\n\n**TOOLS USED**\n\n- {"\n- ".join(TOOLS_USED)}"
 
-            CHUNKS = await telegramify(REPLY_MD_FOR_CHUNKS, max_message_length=4090)
-            for chunk in CHUNKS:
-                if chunk.content_type == ContentType.TEXT:
-                    await update.message.reply_text(
-                        chunk.text,
-                        entities=[e.to_dict() for e in chunk.entities],
-                    )
-                elif chunk.content_type == ContentType.PHOTO:
-                    await update.message.reply_photo(
-                        photo=chunk.file_data,
-                        filename=chunk.file_name,
-                        caption=chunk.caption_text or None,
-                        caption_entities=[e.to_dict() for e in chunk.caption_entities]
-                        or None,
-                    )
-                elif chunk.content_type == ContentType.FILE:
-                    await update.message.reply_document(
-                        document=chunk.file_data,
-                        filename=chunk.file_name,
-                        caption=chunk.caption_text or None,
-                        caption_entities=[e.to_dict() for e in chunk.caption_entities]
-                        or None,
-                    )
+        CHUNKS = await telegramify(REPLY_MD_FOR_CHUNKS, max_message_length=4090)
+        for chunk in CHUNKS:
+            if chunk.content_type == ContentType.TEXT:
+                await update.message.reply_text(
+                    chunk.text,
+                    entities=[e.to_dict() for e in chunk.entities],
+                )
+            elif chunk.content_type == ContentType.PHOTO:
+                await update.message.reply_photo(
+                    photo=chunk.file_data,
+                    filename=chunk.file_name,
+                    caption=chunk.caption_text or None,
+                    caption_entities=[e.to_dict() for e in chunk.caption_entities]
+                    or None,
+                )
+            elif chunk.content_type == ContentType.FILE:
+                await update.message.reply_document(
+                    document=chunk.file_data,
+                    filename=chunk.file_name,
+                    caption=chunk.caption_text or None,
+                    caption_entities=[e.to_dict() for e in chunk.caption_entities]
+                    or None,
+                )
 
-            await context.bot.set_message_reaction(
-                chat_id=update.effective_chat.id,
-                message_id=update.effective_message.message_id,
-                reaction=[ReactionTypeEmoji(emoji="👍")],
-            )
+        await context.bot.set_message_reaction(
+            chat_id=update.effective_chat.id,
+            message_id=update.effective_message.message_id,
+            reaction=[ReactionTypeEmoji(emoji="👍")],
+        )
 
-            DB.execute(
-                "INSERT INTO chat_history (message, response) VALUES (?, ?)",
-                (MESSAGE, REPLY_MD),
-            )
-            DB.commit()
+        DB.execute(
+            "INSERT INTO chat_history (message, response) VALUES (?, ?)",
+            (MESSAGE, REPLY_MD),
+        )
+        DB.commit()
     except Exception as e:
         print(e)
         await update.message.reply_text(f"ERROR: {e}")
