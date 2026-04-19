@@ -1,9 +1,13 @@
 import datetime
 from .skills import skills
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATE_DIR = BASE_DIR / "system_prompt"
 
 ENV = Environment(
-    loader=FileSystemLoader("./utilities/system_prompt"),
+    loader=FileSystemLoader(TEMPLATE_DIR),
     autoescape=select_autoescape()
 ) 
 

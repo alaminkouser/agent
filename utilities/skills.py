@@ -1,6 +1,12 @@
 from agent_skills import SkillsManager, SkillContext, SkillSearchResult, Skill
+from pathlib import Path
 
-SKILLS_MANAGER = SkillsManager("./.DATA/skills")
+BASE_DIR = Path(__file__).resolve().parent
+SKILLS_DIR = BASE_DIR / ".." / ".DATA/skills"
+
+print(SKILLS_DIR)
+
+SKILLS_MANAGER = SkillsManager(SKILLS_DIR)
 
 class skills:
     def skills_discover():
