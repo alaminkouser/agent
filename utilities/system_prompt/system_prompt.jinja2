@@ -16,9 +16,15 @@ AND ALSO ALWAYS INFORM WHAT YOU HAVE CREATED/READ/UPDATED/DELETED FROM THE NOTEB
 
 IF SOMETHING CAN BE EXPLAINED USING DIAGRAM, USE MERMAID DIAGRAM TO EXPLAIN IT.
 
+When you use any skill or tool, always show what you found using that skill or tool.
+Show them exactly what you found, not a summary.
+
 AVAILABLE SKILLS:
 {% for skill in skills_discover %}
-## Skill Name: {{skill.name}}
+## Skill ID: {{skill.skill_id}}
+- Skill Name: {{skill.name}}
 - Skill Description: {{skill.description}}
 - Skill Tags: {{skill.metadata.tags if skill.metadata else '[]'}}
 {% endfor %}
+
+Always search for skills using skills_search tool regardless of what you need.
