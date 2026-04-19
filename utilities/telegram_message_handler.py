@@ -7,6 +7,7 @@ from telegramify_markdown.content import ContentType
 from .db import DB
 from .system_prompt import system_prompt
 from .status_put import status_put
+from .skills import skills
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -54,6 +55,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if MCP_CLIENT is None:
         await update.message.reply_text("ERROR: MCP client is not initialized.")
         return
+    
+    SKILLS_DISCOVER = skills.skills_discover
+    SKILLS_CREATE = skills.skills_create
+    SKILLS_READ = skills.skills_read
+    SKILLS_SEARCH = skills.skills_search
+    SKILLS_UPDATE = skills.skills_update
 
     try:
         AI_RESPONSE = await GENAI_CLIENT.aio.models.generate_content(
@@ -61,7 +68,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             contents=CONTENT_LIST,
             config=genai.types.GenerateContentConfig(
                 temperature=0,
-                tools=[MCP_CLIENT.session, status_put, grounding_tool],
+                tools=[MCP_CLIENT.session, status_put, grounding_tool, SKILLS_DISCOVER, SKILLS_CREATE, SKILLS_READ, SKILLS_SEARCH, SKILLS_UPDATE],
                 tool_config=genai.types.ToolConfig(
                     include_server_side_tool_invocations=True,
                 ),

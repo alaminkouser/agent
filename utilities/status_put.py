@@ -11,5 +11,4 @@ def status_put(status: str):
         subprocess.run(["status-put", status], check=True)
         return "Status updated successfully"
     except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
         return f"Error: {e}"

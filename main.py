@@ -22,10 +22,6 @@ load_dotenv()
 TELEGRAM_BOT = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
 
 
-async def debug_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("DEBUG CALLBACK TRIGGERED:", update.callback_query.data)
-
-
 async def main():
     TELEGRAM_BOT.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
