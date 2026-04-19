@@ -2,5 +2,5 @@ python-telegram-bot
 telegramify-markdown[mermaid]
 google-genai
 python-dotenv
-mcp
+fastmcp
 watchfiles
