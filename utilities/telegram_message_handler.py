@@ -78,7 +78,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         REPLY_MD_FOR_CHUNKS = REPLY_MD
         if TOOLS_USED:
-            REPLY_MD_FOR_CHUNKS = f"{REPLY_MD}\n\n**TOOLS USED**\n\n- {"\n- ".join(TOOLS_USED)}"
+            REPLY_MD_FOR_CHUNKS = (
+                f"{REPLY_MD}\n\n**TOOLS USED**\n\n- {"\n- ".join(TOOLS_USED)}"
+            )
 
         CHUNKS = await telegramify(REPLY_MD_FOR_CHUNKS, max_message_length=4090)
         for chunk in CHUNKS:

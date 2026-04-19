@@ -1,5 +1,6 @@
 import subprocess
 
+
 def status_put(status: str):
     """
     I can help you to update website status. You need to provide status in string format.
@@ -12,4 +13,3 @@ def status_put(status: str):
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
         return f"Error: {e}"
-    

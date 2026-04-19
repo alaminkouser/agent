@@ -9,8 +9,14 @@ def create_mcp_client() -> Client:
                 "command": "npx",
                 "args": ["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH")],
             },
+            "BROWSER": {
+                "command": "npx",
+                "args": ["@playwright/mcp@latest"],
+            },
             "SERPAPI": {
-                "url": "https://mcp.serpapi.com/" + os.getenv("SERP_API_KEY", "") + "/mcp",
+                "url": "https://mcp.serpapi.com/"
+                + os.getenv("SERP_API_KEY", "")
+                + "/mcp",
             },
         }
     }
