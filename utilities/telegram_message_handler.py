@@ -1,13 +1,12 @@
+from pydantic_ai import ModelResponse, TextPart, UserPromptPart, ModelRequest
 import os
 from telegram import Update, ReactionTypeEmoji
 from telegram.ext import ContextTypes
-from google import genai
 from telegramify_markdown import telegramify
 from telegramify_markdown.content import ContentType
 from .db import DB
 from .system_prompt import system_prompt
-from .status_put import status_put
-from .skills import skills
+from .agent import agent
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -16,11 +15,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("YOU ARE NOT ALLOWED TO USE THIS BOT!")
         return
 
-    GENAI_CLIENT = genai.Client(
-        api_key=os.getenv("GEMINI_API_KEY"),
-    )
-
-    grounding_tool = genai.types.Tool(google_search=genai.types.GoogleSearch())
     await context.bot.set_message_reaction(
         chat_id=update.effective_chat.id,
         message_id=update.effective_message.message_id,
@@ -33,68 +27,32 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "SELECT * FROM chat_history ORDER BY id DESC LIMIT 50"
     ).fetchall()
 
-    CONTENT_LIST = [
-        genai.types.Content(
-            role="system", parts=[genai.types.Part(text=system_prompt())]
-        )
-    ]
+    MODEL_MESSAGES = []
 
     for row in ALL_MESSAGES:
-        CONTENT_LIST.append(
-            genai.types.Content(role="user", parts=[genai.types.Part(text=row[1])])
+        print("ROW_1: " + row[1])
+        print("ROW_2: " + row[2])
+        MODEL_MESSAGES.append(
+            ModelRequest(parts=[UserPromptPart(content=row[1])]),
         )
-        CONTENT_LIST.append(
-            genai.types.Content(role="model", parts=[genai.types.Part(text=row[2])])
+        MODEL_MESSAGES.append(
+            ModelResponse(parts=[TextPart(content=row[2])]),
         )
-
-    CONTENT_LIST.append(
-        genai.types.Content(role="user", parts=[genai.types.Part(text=MESSAGE)])
-    )
-
-    MCP_CLIENT = context.application.bot_data.get("mcp_client")
-    if MCP_CLIENT is None:
-        await update.message.reply_text("ERROR: MCP client is not initialized.")
-        return
-
-    SKILLS_DISCOVER = skills.skills_discover
-    SKILLS_CREATE = skills.skills_create
-    SKILLS_READ = skills.skills_read
-    SKILLS_SEARCH = skills.skills_search
 
     try:
-        AI_RESPONSE = await GENAI_CLIENT.aio.models.generate_content(
-            model="gemma-4-31b-it",
-            contents=CONTENT_LIST,
-            config=genai.types.GenerateContentConfig(
-                temperature=0,
-                tools=[
-                    MCP_CLIENT.session,
-                    status_put,
-                    grounding_tool,
-                    SKILLS_DISCOVER,
-                    SKILLS_CREATE,
-                    SKILLS_READ,
-                    SKILLS_SEARCH,
-                ],
-                tool_config=genai.types.ToolConfig(
-                    include_server_side_tool_invocations=True,
-                ),
-            ),
+        AGENT = await agent()
+        AI_RESPONSE = await AGENT.run(
+            MESSAGE, instructions=system_prompt(), message_history=MODEL_MESSAGES
         )
 
-        TOOLS_USED = []
-        for content in AI_RESPONSE.automatic_function_calling_history:
-            for part in content.parts:
-                if part.function_call:
-                    TOOLS_USED.append(part.function_call.name)
+        REPLY_MD = ""
 
-        REPLY_MD = AI_RESPONSE.text
+        if AI_RESPONSE.response.thinking != "":
+            REPLY_MD += AI_RESPONSE.response.thinking + "\n\n---\n\n"
+
+        REPLY_MD += AI_RESPONSE.output
 
         REPLY_MD_FOR_CHUNKS = REPLY_MD
-        if TOOLS_USED:
-            REPLY_MD_FOR_CHUNKS = (
-                f"{REPLY_MD}\n\n**TOOLS USED**\n\n- {"\n- ".join(TOOLS_USED)}"
-            )
 
         CHUNKS = await telegramify(REPLY_MD_FOR_CHUNKS, max_message_length=4090)
         for chunk in CHUNKS:
