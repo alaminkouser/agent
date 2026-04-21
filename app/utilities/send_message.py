@@ -12,7 +12,10 @@ async def send_message(update: Update, message: str) -> bool:
 
     This will also process mermaid diagrams. And send them as images.
     """
-    chunk_list = await telegramify(message, max_message_length=4090)
+    chunk_list = await telegramify(
+        message,
+        max_message_length=4096
+    )
     for chunk in chunk_list:
         if chunk.content_type == ContentType.TEXT:
             await update.message.reply_text(

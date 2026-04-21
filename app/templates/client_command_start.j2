@@ -1,11 +1,45 @@
 Hello {{ user_full_name }}!
 
-I am {{ agent_name }}.
+I am an AI Agent named **{{ agent_name }}**.
 
-{{ agent_description }}
+| {{ agent_description }} |
+| - |
 
-I can help you with the following:
+I can help you with the following things:
 
-- Notebooks
-- Search
-- Website Status Update
+- I can manage your notebook.
+- Do research for you.
+- Update your website status.
+- Draw a diagram for you.
+
+## The way I work:
+
+```mermaid
+flowchart TD
+A([{{ user_full_name }}]) --> B[Bot receives message]
+
+B --> C[Load recent conversation context]
+C --> D[Understand user intent & requirements]
+
+D --> E{Need additional info?}
+
+E -->|Yes| F[Find relevant tools]
+
+F --> G[Use internal tools]
+F --> H[Search notes / notebook]
+F --> I[Use external tools / web search]
+
+G --> J[Process gathered data]
+H --> J
+I --> J
+
+J --> K[Think step-by-step reasoning]
+
+K --> L{More info needed?}
+L -->|Yes| F
+L -->|No| M[Generate final response]
+
+E -->|No| K
+
+M --> A
+```
