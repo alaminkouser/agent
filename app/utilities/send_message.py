@@ -3,6 +3,7 @@ from telegram import Update
 from telegramify_markdown import telegramify
 from telegramify_markdown.content import ContentType
 
+
 async def send_message(update: Update, message: str) -> bool:
     """
     This function formats markdown and sends it to the user.
@@ -12,10 +13,7 @@ async def send_message(update: Update, message: str) -> bool:
 
     This will also process mermaid diagrams. And send them as images.
     """
-    chunk_list = await telegramify(
-        message,
-        max_message_length=4096
-    )
+    chunk_list = await telegramify(message, max_message_length=4096)
     for chunk in chunk_list:
         if chunk.content_type == ContentType.TEXT:
             await update.message.reply_text(
@@ -27,14 +25,12 @@ async def send_message(update: Update, message: str) -> bool:
                 photo=chunk.file_data,
                 filename=chunk.file_name,
                 caption=chunk.caption_text or None,
-                caption_entities=[e.to_dict() for e in chunk.caption_entities]
-                or None,
+                caption_entities=[e.to_dict() for e in chunk.caption_entities] or None,
             )
         elif chunk.content_type == ContentType.FILE:
             await update.message.reply_document(
                 document=chunk.file_data,
                 filename=chunk.file_name,
                 caption=chunk.caption_text or None,
-                caption_entities=[e.to_dict() for e in chunk.caption_entities]
-                or None,
+                caption_entities=[e.to_dict() for e in chunk.caption_entities] or None,
             )

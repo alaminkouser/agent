@@ -11,7 +11,7 @@ from client.helpers.restricted import restricted
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     This function is called when the user sends the /start command.
-    
+
     It sends a message to the user with the agent's name and description.
     It also sends a mermaid diagram of the agent's workflow.
     """
