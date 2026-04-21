@@ -1,8 +1,23 @@
-from client.helpers.restricted import restricted
+from utilities.template import template_env
+from pydantic_ai import Agent
 from telegram import Update
 from telegram.ext import ContextTypes
+
+from utilities.send_message import send_message
+from client.helpers.restricted import restricted
 
 
 @restricted
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"Hello {update.effective_user.first_name}")
+    user_full_name = update.effective_user.full_name
+    agent_main: Agent = context.bot_data["agent_main"]
+    agent_name = agent_main.name
+    agent_description = agent_main.description
+
+    system_prompt = template_env.get_template("client_command_start.j2").render(
+        user_full_name=user_full_name,
+        agent_name=agent_name,
+        agent_description=agent_description,
+    )
+
+    await send_message(update, system_prompt)

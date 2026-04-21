@@ -22,4 +22,9 @@ def agent_main() -> Agent:
 
     mcp_browser = MCPServerStdio(command="npx", args=["@playwright/mcp@latest"])
 
-    return Agent(model, toolsets=[mcp_notebook, mcp_serpapi, mcp_browser])
+    return Agent(
+        model,
+        name="Agent Main",
+        description="The Primary Agent",
+        toolsets=[mcp_notebook, mcp_serpapi, mcp_browser],
+    )
