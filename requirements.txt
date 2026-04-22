@@ -1,5 +1,6 @@
 python-dotenv
 pydantic-ai-slim[google]
+pydantic-ai-skills
 python-telegram-bot
 Jinja2
 telegramify-markdown[mermaid]

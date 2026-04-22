@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -6,6 +7,7 @@ from pydantic_ai import Agent
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.mcp import MCPServerStdio, MCPServerStreamableHTTP
+from pydantic_ai_skills import SkillsCapability
 
 import logfire
 
@@ -15,8 +17,7 @@ from .tools.status_put import status_put, StatusPutInput, StatusPutOutput
 
 load_dotenv()
 
-logfire.configure()
-logfire.instrument_pydantic_ai()
+
 
 
 def agent_main() -> Agent:
@@ -54,6 +55,16 @@ def agent_main() -> Agent:
         description="The Primary Agent",
         instructions=instructions,
         toolsets=tools,
+        capabilities=[
+            SkillsCapability(
+                directories=[
+                    Path(Path(__file__).resolve().parent).joinpath("skills").resolve(),
+                    Path(Path(__file__).resolve().parent).joinpath(
+                        "..", "..", ".DATA", "skills"
+                    ).resolve()
+                ]
+            )
+        ],
     )
 
     @agent.tool_plain
