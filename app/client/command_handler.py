@@ -20,10 +20,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     agent_name = agent_main.name
     agent_description = agent_main.description
 
-    system_prompt = template_env.get_template("client_command_start.j2").render(
+    command_start_message = template_env.get_template("client_command_start.j2").render(
         user_full_name=user_full_name,
         agent_name=agent_name,
         agent_description=agent_description,
     )
 
-    await send_message(update, system_prompt)
+    context.user_data["message_history"] = None
+
+    await send_message(update, command_start_message)

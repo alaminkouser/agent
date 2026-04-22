@@ -11,6 +11,7 @@ from pydantic_ai.messages import (
     FunctionToolCallEvent,
     FunctionToolResultEvent,
     FinalResultEvent,
+    ModelMessage,
 )
 from pydantic_ai.run import AgentRunResultEvent
 from pydantic.dataclasses import dataclass
@@ -50,7 +51,14 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             type=None,
             text="",
         )
-        async for event in agent_main.run_stream_events(user_message):
+
+        user_message_history: list[ModelMessage] | None = context.user_data.get(
+            "message_history", None
+        )
+
+        async for event in agent_main.run_stream_events(
+            user_message, message_history=user_message_history
+        ):
 
             # --- START ---
             if isinstance(event, PartStartEvent):
@@ -82,12 +90,14 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 else:
                     await send_message(update, "UNKNOWN PART")
 
+            elif isinstance(event, AgentRunResultEvent):
+                context.user_data["message_history"] = event.result.new_messages()
+
             else:
                 ignore_events = (
                     FunctionToolCallEvent,
                     FunctionToolResultEvent,
                     FinalResultEvent,
-                    AgentRunResultEvent,
                 )
                 if not isinstance(event, ignore_events):
                     await send_message(update, f"UNKNOWN EVENT: {event}")
