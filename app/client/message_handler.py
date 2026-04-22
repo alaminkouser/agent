@@ -7,7 +7,6 @@ from pydantic_ai.messages import (
     PartDeltaEvent,
     PartEndEvent,
     TextPart,
-    FunctionToolCallEvent,
 )
 from telegram import Update
 from telegram.ext import ContextTypes
