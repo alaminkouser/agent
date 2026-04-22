@@ -3,3 +3,4 @@ pydantic-ai-slim[google]
 python-telegram-bot
 Jinja2
 telegramify-markdown[mermaid]
+logfire

@@ -7,11 +7,16 @@ from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.mcp import MCPServerStdio, MCPServerStreamableHTTP
 
+import logfire
+
 from utilities.template import template_env
 
 from .tools.status_put import status_put, StatusPutInput, StatusPutOutput
 
 load_dotenv()
+
+logfire.configure()
+logfire.instrument_pydantic_ai()
 
 
 def agent_main() -> Agent:
