@@ -1,19 +1,30 @@
 from telegram import ReactionTypeEmoji
 from pydantic_ai import Agent
 from pydantic_ai.messages import (
+    ModelResponsePart,
     ThinkingPart,
     ToolCallPart,
     PartStartEvent,
     PartDeltaEvent,
     PartEndEvent,
     TextPart,
+    FunctionToolCallEvent,
+    FunctionToolResultEvent,
+    FinalResultEvent,
 )
+from pydantic_ai.run import AgentRunResultEvent
+from pydantic.dataclasses import dataclass
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from utilities.send_message import send_message
-from utilities.template import template_env
 from client.helpers.restricted import restricted
+
+
+@dataclass
+class Buffer:
+    type: ModelResponsePart | None
+    text: str
 
 
 @restricted
@@ -35,47 +46,51 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reaction=[ReactionTypeEmoji(emoji="⚡")],
         )
 
-        buffers = {}
+        buffer = Buffer(
+            type=None,
+            text="",
+        )
         async for event in agent_main.run_stream_events(user_message):
 
             # --- START ---
             if isinstance(event, PartStartEvent):
-                buffers[event.index] = {
-                    "type": type(event.part),
-                    "content": getattr(event.part, "content", "") or "",
-                    "tool_name": getattr(event.part, "tool_name", None),
-                }
+                text = ""
+                if isinstance(event.part, ToolCallPart):
+                    text = event.part.tool_name
+                else:
+                    text = event.part.content
+
+                buffer.type = type(event.part)
+                buffer.text = text
 
             # --- DELTA ---
             elif isinstance(event, PartDeltaEvent):
-                buf = buffers.get(event.index)
-                if not buf:
-                    continue
-
-                delta = event.delta
-
-                if hasattr(delta, "content_delta") and delta.content_delta:
-                    buf["content"] += delta.content_delta
+                buffer.text += event.delta.content_delta
 
             # --- END (THIS IS WHERE YOU PRINT) ---
             elif isinstance(event, PartEndEvent):
-                buf = buffers.pop(event.index, None)
-                if not buf:
-                    continue
 
-                part_type = buf["type"]
+                if buffer.type is ThinkingPart:
+                    await send_message(update, f"# THINKING\n\n{buffer.text}")
 
-                if part_type is ThinkingPart:
-                    await send_message(update, f"# THINKING\n\n{buf["content"]}")
+                elif buffer.type is TextPart:
+                    await send_message(update, f"{buffer.text}")
 
-                elif part_type is TextPart:
-                    await send_message(update, f"{buf["content"]}")
-
-                elif part_type is ToolCallPart:
-                    await send_message(update, f"# TOOL\n\n{buf["tool_name"]}")
+                elif buffer.type is ToolCallPart:
+                    await send_message(update, f"# TOOL\n\n{buffer.text}")
 
                 else:
-                    await send_message(update, f"# UNKNOWN\n\n{str(event)}")
+                    await send_message(update, "UNKNOWN PART")
+
+            else:
+                ignore_events = (
+                    FunctionToolCallEvent,
+                    FunctionToolResultEvent,
+                    FinalResultEvent,
+                    AgentRunResultEvent,
+                )
+                if not isinstance(event, ignore_events):
+                    await send_message(update, f"UNKNOWN EVENT: {event}")
 
     except Exception as e:
         print(e)
