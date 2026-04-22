@@ -29,12 +29,14 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         agent_run = await agent_main.run(user_message)
 
-        await send_message(
-            update,
-            template_env.get_template("thinking.j2").render(
-                thinking_text=agent_run.response.thinking
-            ),
-        )
+        if agent_run.response.thinking != None:
+            await send_message(
+                update,
+                template_env.get_template("thinking.j2").render(
+                    thinking_text=agent_run.response.thinking
+                ),
+            )
+
         await send_message(update, agent_run.output)
     except Exception as e:
         print(e)
