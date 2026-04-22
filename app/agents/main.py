@@ -17,7 +17,8 @@ from .tools.status_put import status_put, StatusPutInput, StatusPutOutput
 
 load_dotenv()
 
-
+logfire.configure()
+logfire.instrument_pydantic_ai()
 
 
 def agent_main() -> Agent:
@@ -59,9 +60,9 @@ def agent_main() -> Agent:
             SkillsCapability(
                 directories=[
                     Path(Path(__file__).resolve().parent).joinpath("skills").resolve(),
-                    Path(Path(__file__).resolve().parent).joinpath(
-                        "..", "..", ".DATA", "skills"
-                    ).resolve()
+                    Path(Path(__file__).resolve().parent)
+                    .joinpath("..", "..", ".DATA", "skills")
+                    .resolve(),
                 ]
             )
         ],
