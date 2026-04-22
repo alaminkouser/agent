@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -40,7 +41,9 @@ def agent_main() -> Agent:
 
     mcp_browser = MCPServerStdio(command="npx", args=["@playwright/mcp@latest"])
 
-    instructions = template_env.get_template("agent_main_instructions.j2").render()
+    instructions = template_env.get_template("agent_main_instructions.j2").render(
+        datetime=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
 
     agent = Agent(
         model,
