@@ -37,4 +37,5 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await send_message(update, agent_run.output)
     except Exception as e:
+        print(e)
         await send_message(update, str(e))

@@ -9,6 +9,8 @@ from pydantic_ai.mcp import MCPServerStdio, MCPServerStreamableHTTP
 
 from utilities.template import template_env
 
+from .tools.status_put import status_put, StatusPutInput, StatusPutOutput
+
 load_dotenv()
 
 
@@ -41,10 +43,28 @@ def agent_main() -> Agent:
         tools=tools
     )
 
-    return Agent(
+    agent = Agent(
         model,
         name="Agent Main",
         description="The Primary Agent",
         instructions=instructions,
         toolsets=tools,
     )
+
+    @agent.tool_plain
+    def tool_status_put(input: str) -> StatusPutOutput:
+        """
+        Updates the personal status message displayed on the website.
+
+        Use this tool to share a short, human-readable update about the current
+        personal situation (e.g., availability, focus, mood, or ongoing
+        activities) on https://alaminkouser.com/status/.
+
+        The input should be concise and clear, such as "Working deeply, limited
+        availability", "Taking a break", or "Open to new opportunities". Avoid
+        sensitive or overly detailed personal information. Keep messages brief,
+        intentional, and appropriate for public visibility.
+        """
+        return status_put(StatusPutInput(status=input))
+
+    return agent
