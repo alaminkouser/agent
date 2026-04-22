@@ -40,22 +40,18 @@ def agent_main() -> Agent:
 
     mcp_browser = MCPServerStdio(command="npx", args=["@playwright/mcp@latest"])
 
-    tools = [
-        mcp_notebook,
-        mcp_serpapi,
-        mcp_browser,
-    ]
-
-    instructions = template_env.get_template("agent_main_instructions.j2").render(
-        tools=tools
-    )
+    instructions = template_env.get_template("agent_main_instructions.j2").render()
 
     agent = Agent(
         model,
         name="Agent Main",
         description="The Primary Agent",
         instructions=instructions,
-        toolsets=tools,
+        toolsets=[
+            mcp_notebook,
+            mcp_serpapi,
+            mcp_browser,
+        ],
         capabilities=[
             SkillsCapability(
                 directories=[

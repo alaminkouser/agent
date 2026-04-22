@@ -1,5 +1,14 @@
 from telegram import ReactionTypeEmoji
 from pydantic_ai import Agent
+from pydantic_ai.messages import (
+    ThinkingPart,
+    ToolCallPart,
+    PartStartEvent,
+    PartDeltaEvent,
+    PartEndEvent,
+    TextPart,
+    FunctionToolCallEvent,
+)
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -27,17 +36,48 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reaction=[ReactionTypeEmoji(emoji="⚡")],
         )
 
-        agent_run = await agent_main.run(user_message)
+        buffers = {}
+        async for event in agent_main.run_stream_events(user_message):
 
-        if agent_run.response.thinking != None:
-            await send_message(
-                update,
-                template_env.get_template("thinking.j2").render(
-                    thinking_text=agent_run.response.thinking
-                ),
-            )
+            # --- START ---
+            if isinstance(event, PartStartEvent):
+                buffers[event.index] = {
+                    "type": type(event.part),
+                    "content": getattr(event.part, "content", "") or "",
+                    "tool_name": getattr(event.part, "tool_name", None),
+                }
 
-        await send_message(update, agent_run.output)
+            # --- DELTA ---
+            elif isinstance(event, PartDeltaEvent):
+                buf = buffers.get(event.index)
+                if not buf:
+                    continue
+
+                delta = event.delta
+
+                if hasattr(delta, "content_delta") and delta.content_delta:
+                    buf["content"] += delta.content_delta
+
+            # --- END (THIS IS WHERE YOU PRINT) ---
+            elif isinstance(event, PartEndEvent):
+                buf = buffers.pop(event.index, None)
+                if not buf:
+                    continue
+
+                part_type = buf["type"]
+
+                if part_type is ThinkingPart:
+                    await send_message(update, f"# THINKING\n\n{buf["content"]}")
+
+                elif part_type is TextPart:
+                    await send_message(update, f"{buf["content"]}")
+
+                elif part_type is ToolCallPart:
+                    await send_message(update, f"# TOOL\n\n{buf["tool_name"]}")
+
+                else:
+                    await send_message(update, f"# UNKNOWN\n\n{str(event)}")
+
     except Exception as e:
         print(e)
         await send_message(update, str(e))
