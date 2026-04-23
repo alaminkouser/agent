@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from pydantic_ai import Agent
+from pydantic_ai import Agent, WebFetchTool, WebSearchTool
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.mcp import MCPServerStdio, MCPServerStreamableHTTP
@@ -63,6 +63,7 @@ def agent_main() -> Agent:
                 ]
             )
         ],
+        tools=[WebSearchTool, WebFetchTool],
     )
 
     @agent.tool_plain

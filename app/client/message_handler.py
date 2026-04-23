@@ -41,11 +41,7 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     agent_main: Agent = context.bot_data["agent_main"]
 
     try:
-        await context.bot.set_message_reaction(
-            chat_id=update.effective_chat.id,
-            message_id=update.effective_message.message_id,
-            reaction=[ReactionTypeEmoji(emoji="⚡")],
-        )
+        await send_message(update, "**RECEIVED**")
 
         buffer = Buffer(
             type=None,
