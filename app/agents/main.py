@@ -15,6 +15,7 @@ from utilities.template import template_env
 
 from .tools.tool_status_put import tool_status_put, StatusPutInput, StatusPutOutput
 from .tools.tool_current_datetime import tool_current_datetime
+from .tools.tool_cron import CronCreateInput, tool_cron_create
 
 load_dotenv()
 
@@ -91,5 +92,18 @@ def agent_main() -> Agent:
         intentional, and appropriate for public visibility.
         """
         return tool_status_put(StatusPutInput(status=input))
+
+    @agent.tool_plain
+    def cron_create(input: CronCreateInput) -> str:
+        """
+        Use this tool to create a cron job. If you need to run a task at a
+        specific time, use this tool to create a cron job. The task will be
+        run at the specified time.
+
+        The task shall include step by step instructions to complete the task.
+        You can mention what tools to use and what inputs to provide to the
+        tools.
+        """
+        return tool_cron_create(input)
 
     return agent

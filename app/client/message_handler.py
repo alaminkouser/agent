@@ -1,4 +1,3 @@
-from telegram import ReactionTypeEmoji
 from pydantic_ai import Agent
 from pydantic_ai.messages import (
     ModelResponsePart,
