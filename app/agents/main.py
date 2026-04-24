@@ -13,8 +13,8 @@ import logfire
 
 from utilities.template import template_env
 
-from .tools.status_put import status_put, StatusPutInput, StatusPutOutput
-from .tools.current_datetime import current_datetime
+from .tools.tool_status_put import tool_status_put, StatusPutInput, StatusPutOutput
+from .tools.tool_current_datetime import tool_current_datetime
 
 load_dotenv()
 
@@ -67,16 +67,16 @@ def agent_main() -> Agent:
     )
 
     @agent.tool_plain
-    def tool_current_datetime() -> str:
+    def current_datetime() -> str:
         """
         Returns the current date and time. Always use this tool to get the
         current date and time. Date and time can change. So call this tool every
         time you need the current date and time.
         """
-        return current_datetime()
+        return tool_current_datetime()
 
     @agent.tool_plain
-    def tool_status_put(input: str) -> StatusPutOutput:
+    def status_put(input: str) -> StatusPutOutput:
         """
         Updates the personal status message displayed on the website.
 
@@ -89,6 +89,6 @@ def agent_main() -> Agent:
         sensitive or overly detailed personal information. Keep messages brief,
         intentional, and appropriate for public visibility.
         """
-        return status_put(StatusPutInput(status=input))
+        return tool_status_put(StatusPutInput(status=input))
 
     return agent

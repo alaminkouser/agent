@@ -12,7 +12,7 @@ class StatusPutOutput:
     ok: bool
 
 
-def status_put(input: StatusPutInput) -> StatusPutOutput:
+def tool_status_put(input: StatusPutInput) -> StatusPutOutput:
     """
     This function runs status-put cli script to update website status.
     """
