@@ -27,7 +27,7 @@ def agent_main() -> Agent:
     Creates the main agent with all the tools and instructions.
     """
     model = GoogleModel(
-        "gemma-4-31b-it", provider=GoogleProvider(api_key=os.getenv("GEMINI_API_KEY"))
+        "gemma-4-26b-a4b-it", provider=GoogleProvider(api_key=os.getenv("GEMINI_API_KEY"))
     )
 
     mcp_notebook = MCPServerStdio(
