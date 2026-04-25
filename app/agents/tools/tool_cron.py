@@ -25,9 +25,7 @@ def tool_cron_create(input: CronCreateInput) -> str:
     time, use this tool to create a cron job.
     """
     uuid_str = str(uuid.uuid4())
-    print(uuid_str)
     id = uuid_str.replace("-", "")[:12] + uuid_str.replace("-", "")[13:]
-    print(id)
     cron_file = cron_directory.joinpath(
         input.time.strftime("%Y-%m-%d_%H-%M-%S") + "." + id + ".txt"
     )
