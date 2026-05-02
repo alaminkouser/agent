@@ -41,8 +41,8 @@ def agent_cron() -> Agent:
 
     agent = Agent(
         model,
-        name="Agent Main",
-        description="The Primary Agent",
+        name="Agent Cron",
+        description="The Cron Agent",
         instructions=instructions,
         toolsets=[
             mcp_notebook,
