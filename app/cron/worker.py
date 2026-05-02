@@ -4,6 +4,7 @@ from datetime import datetime
 import time
 
 from pydantic.dataclasses import dataclass
+from pydantic_ai import UsageLimits
 from pydantic_ai.messages import (
     ModelResponsePart,
     ThinkingPart,
@@ -26,8 +27,6 @@ cron_directory = (
     .joinpath("..", "..", ".DATA", "cron")
     .resolve()
 )
-
-cron_directory.mkdir(parents=True, exist_ok=True)
 
 
 @dataclass
@@ -68,7 +67,6 @@ async def cron_worker(telegram_app):
                     agent = agent_cron()
                     cron_task_text = cron_file.read_text()
                     await send_message(f"# CRON\n\n{cron_task_text}")
-                    agent_run = await agent.run(cron_task_text)
 
                     buffer = Buffer(
                         type=None,
@@ -76,7 +74,7 @@ async def cron_worker(telegram_app):
                     )
 
                     async for event in agent.run_stream_events(
-                        cron_task_text,
+                        cron_task_text, usage_limits=UsageLimits(tool_calls_limit=25)
                     ):
 
                         # --- START ---

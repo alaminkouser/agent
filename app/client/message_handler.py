@@ -1,4 +1,4 @@
-from pydantic_ai import Agent
+from pydantic_ai import Agent, UsageLimits
 from pydantic_ai.messages import (
     ModelResponsePart,
     ThinkingPart,
@@ -52,7 +52,9 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         async for event in agent_main.run_stream_events(
-            user_message, message_history=user_message_history
+            user_message,
+            message_history=user_message_history,
+            usage_limits=UsageLimits(tool_calls_limit=25),
         ):
 
             # --- START ---
