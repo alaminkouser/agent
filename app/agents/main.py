@@ -9,8 +9,6 @@ from pydantic_ai.providers.google import GoogleProvider
 from pydantic_ai.mcp import MCPServerStdio, MCPServerStreamableHTTP
 from pydantic_ai_skills import SkillsCapability
 
-import logfire
-
 from utilities.template import template_env
 
 from .tools.tool_status_put import tool_status_put, StatusPutInput, StatusPutOutput
@@ -18,9 +16,6 @@ from .tools.tool_current_datetime import tool_current_datetime
 from .tools.tool_cron import CronCreateInput, tool_cron_create
 
 load_dotenv()
-
-logfire.configure()
-logfire.instrument_pydantic_ai()
 
 
 def agent_main() -> Agent:

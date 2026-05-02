@@ -9,7 +9,12 @@ from client.command_handler import start
 from client.message_handler import text
 from cron.worker import cron_worker
 
+import logfire
+
 load_dotenv()
+
+logfire.configure()
+logfire.instrument_pydantic_ai()
 
 
 telegram_app = (
