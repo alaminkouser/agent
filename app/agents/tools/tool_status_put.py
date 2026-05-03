@@ -1,14 +1,12 @@
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 import subprocess
 
 
-@dataclass
-class StatusPutInput:
+class StatusPutInput(BaseModel):
     status: str
 
 
-@dataclass
-class StatusPutOutput:
+class StatusPutOutput(BaseModel):
     ok: bool
 
 

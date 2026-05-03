@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import time
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 from pydantic_ai import UsageLimits
 from pydantic_ai.messages import (
     ModelResponsePart,
@@ -29,8 +29,7 @@ cron_directory = (
 )
 
 
-@dataclass
-class Buffer:
+class Buffer(BaseModel):
     type: ModelResponsePart | None
     text: str
 

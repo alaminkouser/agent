@@ -1,11 +1,10 @@
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 from datetime import datetime
 from pathlib import Path
 import uuid
 
 
-@dataclass
-class CronCreateInput:
+class CronCreateInput(BaseModel):
     time: datetime
     task: str
 

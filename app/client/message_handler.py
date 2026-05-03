@@ -13,16 +13,15 @@ from pydantic_ai.messages import (
     ModelMessage,
 )
 from pydantic_ai.run import AgentRunResultEvent
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from utilities.send_message import send_message
 from client.helpers.restricted import restricted
+    
 
-
-@dataclass
-class Buffer:
+class Buffer(BaseModel):
     type: ModelResponsePart | None
     text: str
 
