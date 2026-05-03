@@ -38,6 +38,19 @@ def agent_main() -> Agent:
 
     mcp_browser = MCPServerStdio(command="npx", args=["@playwright/mcp@latest"])
 
+    mcp_memory = MCPServerStdio(
+        command="ai-memory",
+        args=[
+            "--db",
+            str(
+                Path(Path(__file__).resolve().parent)
+                .joinpath("..", "..", ".DATA", "memory.db")
+                .resolve(),
+            ),
+            "mcp",
+        ],
+    )
+
     instructions = template_env.get_template("agent_main_instructions.j2").render()
 
     agent = Agent(
@@ -49,6 +62,7 @@ def agent_main() -> Agent:
             mcp_notebook,
             mcp_serpapi,
             mcp_browser,
+            mcp_memory,
         ],
         capabilities=[
             SkillsCapability(
