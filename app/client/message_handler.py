@@ -19,7 +19,7 @@ from telegram.ext import ContextTypes
 
 from utilities.send_message import send_message
 from client.helpers.restricted import restricted
-    
+
 
 class Buffer(BaseModel):
     type: ModelResponsePart | None
