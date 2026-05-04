@@ -1,7 +1,7 @@
 import os
+import asyncio
 from pathlib import Path
 from datetime import datetime
-import time
 
 from pydantic import BaseModel
 from pydantic_ai import UsageLimits
@@ -124,4 +124,4 @@ async def cron_worker(telegram_app):
                         chat_id=int(os.getenv("TELEGRAM_CHAT_ID")), text=str(e)
                     )
 
-        time.sleep(10)
+        await asyncio.sleep(10)

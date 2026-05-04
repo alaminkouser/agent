@@ -43,7 +43,7 @@ def agent_cron() -> Agent:
             "--db",
             str(
                 Path(Path(__file__).resolve().parent)
-                .joinpath(".DATA", "memory.db")
+                .joinpath("..", "..", ".DATA", "memory.db")
                 .resolve(),
             ),
             "mcp",
