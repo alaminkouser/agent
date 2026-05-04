@@ -1,3 +1,5 @@
+import subprocess
+
 from utilities.template import template_env
 from pydantic_ai import Agent
 from telegram import Update
@@ -29,3 +31,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["message_history"] = None
 
     await send_message(update, command_start_message)
+
+@restricted
+async def notebook_commit(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """
+    Triggers an automated Git commit workflow for the notebook project.
+
+    This function calls the external `notebook` shell script with the `commit`
+    command, which performs the following steps:
+
+    1. Formats the codebase using Prettier.
+    2. Checks for any changes using `git diff`.
+    3. If changes are detected:
+        - Generates an appropriate commit message automatically.
+        - Creates a Git commit with the generated message.
+    4. If no changes are found, no commit is created.
+
+    All logic (formatting, diff checking, and commit message generation)
+    is handled by the underlying notebook shell script.
+    """
+    await send_message(update, "# NOTEBOOK\n\nWorking.")
+    subprocess.run(["notebook", "commit"])
+    await send_message(update, "# NOTEBOOK\n\nCommit Done!")
