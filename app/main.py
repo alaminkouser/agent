@@ -3,9 +3,16 @@ import os
 from dotenv import load_dotenv
 import threading
 
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    CallbackQueryHandler,
+)
 from client.post_init import post_init
-from client.command_handler import start, notebook_commit
+from client.button_handler import button_handler
+from client.command_handler import start, notebook, notebook_commit
 from client.message_handler import text
 from cron.worker import cron_worker
 
@@ -25,8 +32,11 @@ telegram_app = (
 )
 
 telegram_app.add_handler(CommandHandler("start", start))
+telegram_app.add_handler(CommandHandler("notebook", notebook))
 telegram_app.add_handler(CommandHandler("notebook_commit", notebook_commit))
 telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text))
+
+telegram_app.add_handler(CallbackQueryHandler(button_handler))
 
 
 def start_cron_worker():
