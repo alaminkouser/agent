@@ -8,11 +8,22 @@ from telegram import (
 )
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
+
 from client.helpers.restricted import restricted
 
 
 @restricted
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles interactive button clicks from the Telegram UI, specifically for the
+    notebook browser.
+
+    This function processes callback queries based on their data prefix:
+    - "notebook:d:": Lists the contents of a directory and updates the inline
+      keyboard for further navigation.
+    - "notebook:f:": Reads and displays the content of a Markdown (.md) file
+      using the MCP notebook tool.
+    """
 
     query = update.callback_query
     query_data = query.data
@@ -22,6 +33,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         args=["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH")],
     )
     mcp_notebook_tools = await mcp_notebook.list_tools()
+
     if query_data.startswith("notebook:d:"):
         mcp_notebook_tool_list_directory = None
         for tool in mcp_notebook_tools:
@@ -89,7 +101,11 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 tool_args={"path": FILE_PATH},
             )
             await query.edit_message_text(
-                text=f"```md\n{mcp_notebook_tool_read_note_response["content"].replace("-", "\\-").replace("`", "\\`")}\n```",
+                text=f"```md\n{
+                    mcp_notebook_tool_read_note_response["content"]
+                    .replace("-", "\\-")
+                    .replace("`", "\\`")
+                }\n```",
                 parse_mode=ParseMode.MARKDOWN_V2,
             )
 
