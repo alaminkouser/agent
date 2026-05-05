@@ -38,8 +38,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @restricted
 async def notebook(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     """
-    This function is called when the user sends the /notebook command.
-    It lists the notebook directories and files.
+    Handles the /notebook command by listing the root directory contents of the vault.
+
+    This function:
+    1. Initializes an MCP connection to `mcpvault` using the configured `NOTEBOOK_PATH`.
+    2. Fetches the list of tools and identifies the `list_directory` tool.
+    3. Retrieves the contents of the root directory (/).
+    4. Filters out hidden files and directories.
+    5. Presents the results as an interactive inline keyboard, allowing users to
+       navigate into directories or view files.
     """
     mcp_notebook = MCPServerStdio(
         command="npx",
