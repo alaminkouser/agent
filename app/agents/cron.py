@@ -13,6 +13,10 @@ from utilities.template import template_env
 
 from .tools.tool_status_put import tool_status_put, StatusPutInput, StatusPutOutput
 from .tools.tool_current_datetime import tool_current_datetime
+from .tools.tool_email_read_unseen import (
+    tool_email_read_unseen,
+    EmailReadUnseenResponse,
+)
 
 load_dotenv()
 
@@ -100,5 +104,17 @@ def agent_cron() -> Agent:
         intentional, and appropriate for public visibility.
         """
         return tool_status_put(StatusPutInput(status=input))
+
+    @agent.tool_plain
+    def email_read_unseen() -> list[EmailReadUnseenResponse] | str:
+        """
+        Use this tool to read all the unseen emails in the inbox.
+
+        If there is an email in the inbox, it will be returned as a list of
+        EmailReadUnseenResponse objects.
+        If there is no email in the inbox, it will return "NO_EMAIL_FOUND".
+        If there is an error, it will be returned as a string.
+        """
+        return tool_email_read_unseen()
 
     return agent
