@@ -60,6 +60,13 @@ def agent_main() -> Agent:
         timeout=60,
     )
 
+    mcp_firecrawl = MCPServerStreamableHTTP(
+        url="https://mcp.firecrawl.dev/"
+        + os.getenv("FIRECRAWL_API_KEY", "")
+        + "/v2/mcp",
+        timeout=60,
+    )
+
     instructions = template_env.get_template("agent_main_instructions.j2").render()
 
     agent = Agent(
@@ -72,6 +79,7 @@ def agent_main() -> Agent:
             mcp_serpapi,
             mcp_browser,
             mcp_memory,
+            mcp_firecrawl,
         ],
         capabilities=[
             SkillsCapability(
