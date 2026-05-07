@@ -48,6 +48,7 @@ async def notebook(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     5. Presents the results as an interactive inline keyboard, allowing users to
        navigate into directories or view files.
     """
+    await send_message(update, "RECEIVED")
     mcp_notebook = MCPServerStdio(
         command="npx",
         args=["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH")],

@@ -13,7 +13,7 @@ from client.helpers.restricted import restricted
 
 
 @restricted
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def button_handler(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     """
     Handles interactive button clicks from the Telegram UI, specifically for the
     notebook browser.
@@ -28,10 +28,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     query_data = query.data
 
+    await query.edit_message_text(text=f"LOADING MCP NOTEBOOK")
+
     mcp_notebook = MCPServerStdio(
         command="npx",
         args=["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH")],
     )
+
     mcp_notebook_tools = await mcp_notebook.list_tools()
 
     if query_data.startswith("notebook:d:"):
@@ -69,14 +72,32 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     )
                 ]
             )
-        for file in FILES:
-            inline_keyboard_rows.append(
-                [
-                    InlineKeyboardButton(
-                        text=file, callback_data=f"notebook:f:{PATH}/{file}"
-                    )
-                ]
-            )
+
+        IS_DATES_YYYY_MM_DIR = False
+        if PATH.startswith("/DATES/") and len(PATH.split("/")) == 4:
+            IS_DATES_YYYY_MM_DIR = True
+
+        if IS_DATES_YYYY_MM_DIR:
+            row: list[InlineKeyboardButton] = []
+            for i, file in enumerate(FILES):
+                button = InlineKeyboardButton(
+                    text=file, callback_data=f"notebook:f:{PATH}/{file}"
+                )
+                row.append(button)
+                if (i + 1) % 3 == 0:
+                    inline_keyboard_rows.append(row)
+                    row = []
+            if row:
+                inline_keyboard_rows.append(row)
+        else:
+            for file in FILES:
+                inline_keyboard_rows.append(
+                    [
+                        InlineKeyboardButton(
+                            text=file, callback_data=f"notebook:f:{PATH}/{file}"
+                        )
+                    ]
+                )
 
         keyboard_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard_rows)
 
