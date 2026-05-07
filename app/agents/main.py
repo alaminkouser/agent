@@ -34,13 +34,17 @@ def agent_main() -> Agent:
     mcp_notebook = MCPServerStdio(
         command="npx",
         args=["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH")],
+        timeout=60,
     )
 
     mcp_serpapi = MCPServerStreamableHTTP(
-        url="https://mcp.serpapi.com/" + os.getenv("SERP_API_KEY", "") + "/mcp"
+        url="https://mcp.serpapi.com/" + os.getenv("SERP_API_KEY", "") + "/mcp",
+        timeout=60,
     )
 
-    mcp_browser = MCPServerStdio(command="npx", args=["@playwright/mcp@latest"])
+    mcp_browser = MCPServerStdio(
+        command="npx", args=["@playwright/mcp@latest"], timeout=60
+    )
 
     mcp_memory = MCPServerStdio(
         command="ai-memory",
@@ -53,6 +57,7 @@ def agent_main() -> Agent:
             ),
             "mcp",
         ],
+        timeout=60,
     )
 
     instructions = template_env.get_template("agent_main_instructions.j2").render()
