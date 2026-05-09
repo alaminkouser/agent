@@ -7,5 +7,10 @@ description: I greet people.
 
 To greet some one use the `greet` script. These arguments are required:
 
-- name-first
-- name-last
+- name-first (string, required)
+- name-last (string, required)
+
+## Usage Examples
+
+- name-first: "FIRST NAME"
+- name-last: "LAST NAME"
