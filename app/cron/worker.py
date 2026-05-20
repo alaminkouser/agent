@@ -5,7 +5,6 @@ from datetime import datetime
 
 from telegram import MessageEntity
 from telegramify_markdown import Text, Photo, File
-from telegramify_markdown.content import ContentType
 from pydantic import BaseModel
 from pydantic_ai import UsageLimits
 from pydantic_ai.messages import (
@@ -21,7 +20,7 @@ from pydantic_ai.messages import (
     FinalResultEvent,
 )
 from pydantic_ai.run import AgentRunResultEvent
-from telegramify_markdown import telegramify, ContentType
+from telegramify_markdown import telegramify
 
 from agents.cron import agent_cron
 
@@ -118,7 +117,7 @@ async def cron_worker(telegram_app):
                             text = ""
                             if isinstance(event.part, ToolCallPart):
                                 text = event.part.tool_name
-                            else:
+                            elif isinstance(event.part, TextPart):
                                 text = event.part.content
 
                             buffer.type = type(event.part)
