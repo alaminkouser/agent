@@ -75,13 +75,15 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif isinstance(event, PartEndEvent):
 
                 if buffer.type is ThinkingPart:
-                    await send_message(update, f"# THINKING\n\n```md\n{buffer.text}\n```")
+                    await send_message(
+                        update, f"# THINKING\n\n{buffer.text}"
+                    )
 
                 elif buffer.type is TextPart:
                     await send_message(update, f"{buffer.text}")
 
                 elif buffer.type is ToolCallPart:
-                    await send_message(update, f"# TOOL\n\n```md\n{buffer.text}\n```")
+                    await send_message(update, f"# TOOL\n\n{buffer.text}")
 
                 else:
                     await send_message(update, "UNKNOWN PART")

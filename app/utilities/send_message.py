@@ -2,7 +2,7 @@ from telegram.constants import ParseMode
 from utilities.ensure_string import ensure_string
 from telegram import Update
 
-from telegramify_markdown import telegramify
+from telegramify_markdown import telegramify, Text, Photo
 from telegramify_markdown.config import get_runtime_config
 from telegramify_markdown.content import ContentType
 
@@ -16,6 +16,8 @@ async def send_message(update: Update, message: str) -> bool:
 
     This will also process mermaid diagrams. And send them as images.
     """
+    if not update.message:
+        return False
     cfg = get_runtime_config()
     cfg.markdown_symbol.heading_level_1 = "# "
     cfg.markdown_symbol.heading_level_2 = "## "
@@ -25,11 +27,14 @@ async def send_message(update: Update, message: str) -> bool:
     cfg.markdown_symbol.heading_level_6 = "###### "
     chunk_list = await telegramify(message, max_message_length=4096)
     for chunk in chunk_list:
-        if chunk.content_type == ContentType.TEXT:
+        if isinstance(chunk, Text):
+            print("TEST:SM:TEXT")
             await update.message.reply_text(
-                chunk.text, entities=[e.to_dict() for e in chunk.entities]
+                chunk.text,
+                entities=[e.to_dict() for e in chunk.entities]
             )
-        elif chunk.content_type == ContentType.PHOTO:
+        elif isinstance(chunk, Photo):
+            print("TEST:SM:PHOTO")
             await update.message.reply_photo(
                 photo=chunk.file_data,
                 filename=chunk.file_name,
@@ -40,8 +45,7 @@ async def send_message(update: Update, message: str) -> bool:
             if (
                 chunk.file_name != None
                 and (
-                    chunk.file_name.endswith(".md")
-                    or chunk.file_name.endswith(".txt")
+                    chunk.file_name.endswith(".md") or chunk.file_name.endswith(".txt")
                 )
                 and ensure_string(chunk.file_data)
                 and len(chunk.file_data) <= 4000
@@ -58,3 +62,4 @@ async def send_message(update: Update, message: str) -> bool:
                     caption_entities=[e.to_dict() for e in chunk.caption_entities]
                     or None,
                 )
+    return True
