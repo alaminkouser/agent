@@ -26,7 +26,7 @@ logfire.instrument_pydantic_ai()
 
 telegram_app = (
     ApplicationBuilder()
-    .token(os.getenv("TELEGRAM_BOT_TOKEN"))
+    .token(os.getenv("TELEGRAM_BOT_TOKEN", ""))
     .post_init(post_init)
     .build()
 )
