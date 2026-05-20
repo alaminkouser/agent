@@ -1,3 +1,4 @@
+from telegram import MessageEntity
 from telegram.constants import ParseMode
 from utilities.ensure_string import ensure_string
 from telegram import Update
@@ -29,16 +30,26 @@ async def send_message(update: Update, message: str) -> bool:
     for chunk in chunk_list:
         if isinstance(chunk, Text):
             print("TEST:SM:TEXT")
-            await update.message.reply_text(
-                chunk.text, entities=[e.to_dict() for e in chunk.entities]
+            ptb_entities = (
+                [MessageEntity.de_json(e.to_dict(), bot=None) for e in chunk.entities]
+                if chunk.entities
+                else None
             )
+            await update.message.reply_text(chunk.text, entities=ptb_entities)
         elif isinstance(chunk, Photo):
             print("TEST:SM:PHOTO")
+            ptb_caption_entities = (
+                MessageEntity.de_list(
+                    [e.to_dict() for e in chunk.caption_entities], bot=None
+                )
+                if chunk.caption_entities
+                else None
+            )
             await update.message.reply_photo(
                 photo=chunk.file_data,
                 filename=chunk.file_name,
                 caption=chunk.caption_text or None,
-                caption_entities=[e.to_dict() for e in chunk.caption_entities] or None,
+                caption_entities=ptb_caption_entities,
             )
         elif chunk.content_type == ContentType.FILE:
             if (
@@ -54,11 +65,17 @@ async def send_message(update: Update, message: str) -> bool:
                     f"```md\n{text}```", parse_mode=ParseMode.MARKDOWN_V2
                 )
             else:
+                ptb_caption_entities = (
+                    MessageEntity.de_list(
+                        [e.to_dict() for e in chunk.caption_entities], bot=None
+                    )
+                    if chunk.caption_entities
+                    else None
+                )
                 await update.message.reply_document(
                     document=chunk.file_data,
                     filename=chunk.file_name,
                     caption=chunk.caption_text or None,
-                    caption_entities=[e.to_dict() for e in chunk.caption_entities]
-                    or None,
+                    caption_entities=ptb_caption_entities,
                 )
     return True
