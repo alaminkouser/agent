@@ -3,6 +3,9 @@ import asyncio
 from pathlib import Path
 from datetime import datetime
 
+from telegram import MessageEntity
+from telegramify_markdown import Text, Photo, File
+from telegramify_markdown.content import ContentType
 from pydantic import BaseModel
 from pydantic_ai import UsageLimits
 from pydantic_ai.messages import (
@@ -35,25 +38,59 @@ class Buffer(BaseModel):
 
 
 async def cron_worker(telegram_app):
+
     async def send_message(text_message: str):
         chunk_list = await telegramify(text_message, max_message_length=4096)
+        chat_id = int(os.getenv("TELEGRAM_CHAT_ID", ""))
+
         for chunk in chunk_list:
-            if chunk.content_type == ContentType.TEXT:
+            if isinstance(chunk, Text):
+                ptb_entities = (
+                    MessageEntity.de_list(
+                        [e.to_dict() for e in chunk.entities], bot=None
+                    )
+                    if chunk.entities
+                    else None
+                )
+
                 await telegram_app.bot.send_message(
-                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")),
+                    chat_id=chat_id,
                     text=chunk.text,
+                    entities=ptb_entities,
                 )
-            elif chunk.content_type == ContentType.PHOTO:
+
+            elif isinstance(chunk, Photo):
+                ptb_caption_entities = (
+                    MessageEntity.de_list(
+                        [e.to_dict() for e in chunk.caption_entities], bot=None
+                    )
+                    if chunk.caption_entities
+                    else None
+                )
+
                 await telegram_app.bot.send_photo(
-                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")),
+                    chat_id=chat_id,
                     photo=chunk.file_data,
+                    filename=chunk.file_name,
                     caption=chunk.caption_text or None,
+                    caption_entities=ptb_caption_entities,
                 )
-            elif chunk.content_type == ContentType.FILE:
+
+            elif isinstance(chunk, File):
+                ptb_caption_entities = (
+                    MessageEntity.de_list(
+                        [e.to_dict() for e in chunk.caption_entities], bot=None
+                    )
+                    if chunk.caption_entities
+                    else None
+                )
+
                 await telegram_app.bot.send_document(
-                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")),
+                    chat_id=chat_id,
                     document=chunk.file_data,
                     filename=chunk.file_name,
+                    caption=chunk.caption_text or None,
+                    caption_entities=ptb_caption_entities,
                 )
 
     while True:

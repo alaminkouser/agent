@@ -3,7 +3,7 @@ from telegram.constants import ParseMode
 from utilities.ensure_string import ensure_string
 from telegram import Update
 
-from telegramify_markdown import telegramify, Text, Photo
+from telegramify_markdown import telegramify, Text, Photo, File
 from telegramify_markdown.config import get_runtime_config
 from telegramify_markdown.content import ContentType
 
@@ -49,7 +49,7 @@ async def send_message(update: Update, message: str) -> bool:
                 caption=chunk.caption_text or None,
                 caption_entities=ptb_caption_entities,
             )
-        elif chunk.content_type == ContentType.FILE:
+        elif isinstance(chunk, File):
             if (
                 chunk.file_name != None
                 and (
