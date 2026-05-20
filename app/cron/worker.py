@@ -40,18 +40,18 @@ async def cron_worker(telegram_app):
         for chunk in chunk_list:
             if chunk.content_type == ContentType.TEXT:
                 await telegram_app.bot.send_message(
-                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID")),
+                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")),
                     text=chunk.text,
                 )
             elif chunk.content_type == ContentType.PHOTO:
                 await telegram_app.bot.send_photo(
-                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID")),
+                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")),
                     photo=chunk.file_data,
                     caption=chunk.caption_text or None,
                 )
             elif chunk.content_type == ContentType.FILE:
                 await telegram_app.bot.send_document(
-                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID")),
+                    chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")),
                     document=chunk.file_data,
                     filename=chunk.file_name,
                 )
@@ -121,7 +121,7 @@ async def cron_worker(telegram_app):
                 except Exception as e:
                     print(e)
                     await telegram_app.bot.send_message(
-                        chat_id=int(os.getenv("TELEGRAM_CHAT_ID")), text=str(e)
+                        chat_id=int(os.getenv("TELEGRAM_CHAT_ID", "")), text=str(e)
                     )
 
         await asyncio.sleep(10)

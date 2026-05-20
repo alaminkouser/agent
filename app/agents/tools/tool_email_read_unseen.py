@@ -14,9 +14,9 @@ class EmailReadUnseenResponse(BaseModel):
 
 def tool_email_read_unseen() -> list[EmailReadUnseenResponse] | str:
 
-    mail = imaplib.IMAP4_SSL(os.getenv("IMAP_SERVER_NAME"))
+    mail = imaplib.IMAP4_SSL(os.getenv("IMAP_SERVER_NAME", ""))
 
-    mail.login(os.getenv("IMAP_USER"), os.getenv("IMAP_PASSWORD"))
+    mail.login(os.getenv("IMAP_USER", ""), os.getenv("IMAP_PASSWORD", ""))
 
     mail.select("INBOX")
 
@@ -40,9 +40,9 @@ def tool_email_read_unseen() -> list[EmailReadUnseenResponse] | str:
             msg_obj = BytesParser().parsebytes(email_bytes)
             email_reads_unseen_list.append(
                 EmailReadUnseenResponse(
-                    from_address=msg_obj.get("From"),
-                    subject=msg_obj.get("Subject"),
-                    date=msg_obj.get("Date"),
+                    from_address=msg_obj.get("From", "FROM_ADDRESS_NOT_FOUND"),
+                    subject=msg_obj.get("Subject", "SUBJECT_NOT_FOUND"),
+                    date=msg_obj.get("Date", "DATE_NOT_FOUND"),
                 )
             )
 

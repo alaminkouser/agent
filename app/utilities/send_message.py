@@ -30,8 +30,7 @@ async def send_message(update: Update, message: str) -> bool:
         if isinstance(chunk, Text):
             print("TEST:SM:TEXT")
             await update.message.reply_text(
-                chunk.text,
-                entities=[e.to_dict() for e in chunk.entities]
+                chunk.text, entities=[e.to_dict() for e in chunk.entities]
             )
         elif isinstance(chunk, Photo):
             print("TEST:SM:PHOTO")

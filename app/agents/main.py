@@ -33,7 +33,7 @@ def agent_main() -> Agent:
 
     mcp_notebook = MCPServerStdio(
         command="npx",
-        args=["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH")],
+        args=["@bitbonsai/mcpvault", os.getenv("NOTEBOOK_PATH", "")],
         timeout=60,
     )
 
