@@ -39,7 +39,10 @@ async def send_message(update: Update, message: str) -> bool:
         elif chunk.content_type == ContentType.FILE:
             if (
                 chunk.file_name != None
-                and chunk.file_name.endswith(".md")
+                and (
+                    chunk.file_name.endswith(".md")
+                    or chunk.file_name.endswith(".txt")
+                )
                 and ensure_string(chunk.file_data)
                 and len(chunk.file_data) <= 4000
             ):
