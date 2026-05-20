@@ -29,7 +29,6 @@ async def send_message(update: Update, message: str) -> bool:
     chunk_list = await telegramify(message, max_message_length=4096)
     for chunk in chunk_list:
         if isinstance(chunk, Text):
-            print("TEST:SM:TEXT")
             ptb_entities = (
                 [MessageEntity.de_json(e.to_dict(), bot=None) for e in chunk.entities]
                 if chunk.entities
@@ -37,7 +36,6 @@ async def send_message(update: Update, message: str) -> bool:
             )
             await update.message.reply_text(chunk.text, entities=ptb_entities)
         elif isinstance(chunk, Photo):
-            print("TEST:SM:PHOTO")
             ptb_caption_entities = (
                 MessageEntity.de_list(
                     [e.to_dict() for e in chunk.caption_entities], bot=None
