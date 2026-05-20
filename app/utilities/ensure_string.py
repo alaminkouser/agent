@@ -1,7 +1,10 @@
 def ensure_string(data) -> bool:
     if isinstance(data, bytes):
-        return data.decode("utf-8")
+        try:
+            data.decode("utf-8")
+            return True
+        except UnicodeDecodeError:
+            return False
     elif isinstance(data, str):
-        return data
-    else:
-        raise TypeError(f"Unsupported type: {type(data)}")
+        return True
+    return False
